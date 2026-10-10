@@ -1,0 +1,9 @@
+{
+  // Tự chọn Python trong venv (Windows). Mac/Linux đổi thành: ${workspaceFolder}/venv/bin/python
+  "python.defaultInterpreterPath": "${workspaceFolder}/venv/Scripts/python.exe",
+  "python.terminal.activateEnvironment": true,
+  "editor.formatOnSave": true,
+  "files.exclude": {
+    "**/__pycache__": true
+  }
+}

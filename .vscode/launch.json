@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "FloodNav Backend (uvicorn)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["app.main:app", "--reload"],
+      "cwd": "${workspaceFolder}/backend",
+      "jinja": true
+    },
+    {
+      "name": "Setup database",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/db/setup_db.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Reset database (XOÁ hết dữ liệu)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/db/setup_db.py",
+      "args": ["--reset"],
+      "console": "integratedTerminal"
+    }
+  ]
+}
