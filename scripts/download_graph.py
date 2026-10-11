@@ -4,7 +4,9 @@ và lưu vào data/hanoi_drive.graphml.
 
 Chạy:  python scripts/download_graph.py
 Cần Internet, mất khoảng 1-5 phút. Chỉ cần chạy 1 lần.
+Script tự thử lần lượt nhiều máy chủ Overpass nếu máy chủ đầu bị lỗi/chậm.
 """
+import sys
 from pathlib import Path
 
 import osmnx as ox
@@ -12,14 +14,38 @@ import osmnx as ox
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "data" / "hanoi_drive.graphml"
 
-# (tây, nam, đông, bắc) -> phủ Cầu Giấy, Đống Đa, Thanh Xuân, Nam Từ Liêm, Tây Hồ
-BBOX = (105.765, 20.995, 105.840, 21.060)
+# (tây, nam, đông, bắc) -> phủ Cầu Giấy, Đống Đa, Thanh Xuân, Nam Từ Liêm; bao đủ 8 điểm ngập mẫu
+BBOX = (105.772, 21.003, 105.831, 21.052)
+
+# Các máy chủ Overpass (thử lần lượt)
+ENDPOINTS = [
+    "https://overpass-api.de/api",
+    "https://overpass.kumi.systems/api",
+    "https://overpass.private.coffee/api",
+]
+
+ox.settings.requests_timeout = 300
 
 
 def main():
     OUT.parent.mkdir(exist_ok=True)
-    print(f"Đang tải đường từ OpenStreetMap, khung {BBOX} ...")
-    G = ox.graph_from_bbox(BBOX, network_type="drive")
+    G = None
+
+    for url in ENDPOINTS:
+        print(f"Đang tải đường từ {url} (khung {BBOX}) ...")
+        ox.settings.overpass_url = url
+        try:
+            G = ox.graph_from_bbox(BBOX, network_type="drive")
+            break
+        except Exception as e:
+            print(f"  -> Lỗi: {type(e).__name__}. Thử máy chủ khác...\n")
+
+    if G is None:
+        sys.exit(
+            "Không tải được từ máy chủ nào.\n"
+            "-> Thử: tắt VPN/proxy, đổi sang mạng khác (ví dụ phát 4G từ điện thoại), "
+            "hoặc chạy lại sau vài phút."
+        )
 
     # Giữ thành phần liên thông mạnh lớn nhất để chắc chắn tìm được đường đi 2 chiều
     G = ox.truncate.largest_component(G, strongly=True)
