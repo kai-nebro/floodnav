@@ -1,0 +1,73 @@
+# File test API cho extension "REST Client" trong VS Code.
+# Cách dùng: bấm chữ "Send Request" hiện phía trên mỗi dòng GET/POST/... (cần chạy backend trước).
+
+@base = http://localhost:8000/api
+
+### 1. Kiểm tra hệ thống
+GET {{base}}/health
+
+### 2. Danh sách điểm ngập
+GET {{base}}/flood-points
+
+### 3. Xem 1 điểm ngập
+GET {{base}}/flood-points/1
+
+### 4. Tạo điểm ngập mới
+POST {{base}}/flood-points
+Content-Type: application/json
+
+{
+  "name": "Điểm thử nghiệm",
+  "lng": 105.8000,
+  "lat": 21.0300,
+  "sensor_id": "SENSOR-TEST",
+  "threshold_cm": 25
+}
+
+### 5. Sửa điểm ngập (đổi ngưỡng) - đổi số 9 thành id thật vừa tạo ở bước 4
+PUT {{base}}/flood-points/9
+Content-Type: application/json
+
+{ "threshold_cm": 30 }
+
+### 6. Xoá điểm ngập - đổi số 9 thành id thật
+DELETE {{base}}/flood-points/9
+
+### 7. Cảm biến gửi mực nước (theo sensor_id)
+POST {{base}}/readings
+Content-Type: application/json
+
+{ "sensor_id": "SENSOR-001", "depth_cm": 28.5 }
+
+### 8. Lịch sử mực nước của điểm số 1
+GET {{base}}/readings?point_id=1&limit=10
+
+### 9. Người dân báo ngập (gửi lần 1 -> chưa xác nhận)
+POST {{base}}/reports
+Content-Type: application/json
+
+{ "lng": 105.8300, "lat": 21.0000, "level": "medium" }
+
+### 10. Gửi thêm lần 2 (vị trí cách vài mét)
+POST {{base}}/reports
+Content-Type: application/json
+
+{ "lng": 105.8301, "lat": 21.0001, "level": "medium" }
+
+### 11. Gửi lần 3 -> đủ 3 báo cáo trong 100 m -> confirmed = true
+POST {{base}}/reports
+Content-Type: application/json
+
+{ "lng": 105.8300, "lat": 21.0001, "level": "heavy" }
+
+### 12. Xem các báo cáo còn hiệu lực
+GET {{base}}/reports
+
+### 13. Chỉ xem báo cáo đã xác nhận
+GET {{base}}/reports?only_confirmed=true
+
+### 14. Báo "đã hết ngập" tại vị trí đó
+POST {{base}}/reports/clear
+Content-Type: application/json
+
+{ "lng": 105.8300, "lat": 21.0000 }

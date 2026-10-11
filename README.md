@@ -79,8 +79,10 @@ floodnav/
 ├── backend/
 │   ├── requirements.txt
 │   └── app/
-│       ├── main.py          # FastAPI app, các endpoint
-│       └── db.py            # kết nối PostgreSQL
+│       ├── main.py          # FastAPI app
+│       ├── db.py            # kết nối PostgreSQL
+│       ├── schemas.py       # validate dữ liệu vào
+│       └── routers/         # flood_points, readings, reports
 ├── db/
 │   ├── setup_db.py          # tạo database + nạp dữ liệu (không cần psql)
 │   └── init/
@@ -122,7 +124,23 @@ uvicorn app.main:app --reload
 
 Reset database: `python db/setup_db.py --reset`
 
-## 5. Thiết kế dữ liệu
+## 5. Danh sách API
+
+| Method | Đường dẫn | Chức năng |
+|---|---|---|
+| GET | `/api/health` | Kiểm tra backend, DB, PostGIS |
+| GET / POST | `/api/flood-points` | Danh sách (GeoJSON) / tạo điểm ngập |
+| GET / PUT / DELETE | `/api/flood-points/{id}` | Xem / sửa / xoá một điểm ngập |
+| POST | `/api/readings` | Cảm biến gửi mực nước (theo `point_id` hoặc `sensor_id`) |
+| GET | `/api/readings?point_id=&limit=` | Lịch sử mực nước |
+| POST | `/api/reports` | Người dân báo ngập, tự động xác nhận nếu đủ điều kiện |
+| GET | `/api/reports?only_confirmed=` | Các báo cáo còn hiệu lực (GeoJSON) |
+| POST | `/api/reports/clear` | Báo "đã hết ngập" quanh một vị trí |
+| DELETE | `/api/reports/{id}` | Xoá báo cáo |
+
+**Quy tắc xác nhận báo cáo:** một báo cáo được coi là *đã xác nhận* khi có ít nhất 3 báo cáo trong bán kính 100 m trong 15 phút gần nhất, hoặc khi cảm biến gần đó (≤ 100 m) đang đo mực nước ≥ 5 cm. Báo cáo tự hết hạn sau 45 phút.
+
+## 6. Thiết kế dữ liệu
 
 | Bảng | Mô tả |
 |---|---|
@@ -133,12 +151,12 @@ Reset database: `python db/setup_db.py --reset`
 | `nav_sessions` | Các phiên dẫn đường đang hoạt động, phục vụ re-routing |
 | `users` | Người dùng và loại phương tiện |
 
-## 6. Tiến độ
+## 7. Tiến độ
 
 - [x] Thiết kế schema PostGIS, dữ liệu mẫu
 - [x] Backend FastAPI kết nối DB, API đọc điểm ngập (GeoJSON)
-- [ ] CRUD đầy đủ: điểm ngập, số đo mực nước, báo cáo
-- [ ] Xác nhận báo cáo người dân (≥ 3 báo cáo / 100 m / 15 phút)
+- [x] CRUD đầy đủ: điểm ngập, số đo mực nước, báo cáo
+- [x] Xác nhận báo cáo người dân (≥ 3 báo cáo / 100 m / 15 phút, hoặc khớp cảm biến)
 - [ ] Đồ thị đường OSM và trọng số theo mực nước
 - [ ] API tìm đường: nhanh nhất và an toàn nhất
 - [ ] Giao diện bản đồ (React + MapLibre)
@@ -148,10 +166,10 @@ Reset database: `python db/setup_db.py --reset`
 - [ ] Mô hình AI dự báo ngập
 - [ ] Dashboard quản trị
 
-## 7. Lưu ý về dữ liệu
+## 8. Lưu ý về dữ liệu
 
 Toạ độ các điểm ngập trong dữ liệu mẫu là **gần đúng**, chọn từ các điểm hay ngập ở Hà Nội để minh hoạ. Dữ liệu mực nước và dữ liệu huấn luyện mô hình AI là **dữ liệu giả lập** phục vụ demo, không phải số liệu quan trắc thật.
 
-## 8. Giấy phép
+## 9. Giấy phép
 
 Phát hành theo giấy phép [MIT](LICENSE).
