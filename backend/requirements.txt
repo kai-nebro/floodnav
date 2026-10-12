@@ -3,3 +3,4 @@ uvicorn[standard]==0.32.*
 psycopg[binary,pool]==3.2.*
 pydantic==2.*
 python-dotenv==1.*
+osmnx>=2.0,<3
