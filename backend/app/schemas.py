@@ -52,3 +52,14 @@ class ReportClear(BaseModel):
     """Người dùng báo 'đã hết ngập' tại vị trí của họ."""
     lng: float = Field(ge=-180, le=180)
     lat: float = Field(ge=-90, le=90)
+
+
+class LngLat(BaseModel):
+    lng: float = Field(ge=-180, le=180)
+    lat: float = Field(ge=-90, le=90)
+
+
+class RouteRequest(BaseModel):
+    origin: LngLat
+    destination: LngLat
+    vehicle: Literal["motorbike", "car"] = "motorbike"

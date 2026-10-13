@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .db import pool
-from .routers import flood_points, graph_info, readings, reports
+from .routers import flood_points, graph_info, readings, reports, route
 
-app = FastAPI(title="FloodNav API", version="0.2.1")
+app = FastAPI(title="FloodNav API", version="0.3.0")
 
 # Cho phép frontend (React) gọi API khi dev
 app.add_middleware(
@@ -18,6 +18,7 @@ app.include_router(flood_points.router)
 app.include_router(readings.router)
 app.include_router(reports.router)
 app.include_router(graph_info.router)
+app.include_router(route.router)
 
 
 @app.get("/api/health", tags=["Hệ thống"])
